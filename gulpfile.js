@@ -11,12 +11,15 @@ sass.compiler = require('sass');
 const Fiber = require('fibers');
 const autoPrefixer = require('gulp-autoprefixer');
 const sourcemaps = require('gulp-sourcemaps');
-const rename = require('gulp-rename');
-const replace = require('gulp-replace');
+const pug = require('gulp-pug');
+const livereload = require('gulp-livereload');
+const log = require('fancy-log');
 
 // Define base folders
+const devFolder = './dev';
+const buildFolder = './build';
 const imagesFolder = 'img';
-const stylesFolder = 'scss';
+const stylesFolder = buildFolder + 'scss';
 const runTimestamp = Math.round(Date.now()/1000);
 
 // Sprite
@@ -37,41 +40,41 @@ const runTimestamp = Math.round(Date.now()/1000);
 // });
 
 // Icon font
-gulp.task('iconfont', function(done){
-  const iconStream =
-    gulp
-      .src(imagesFolder + '/icons-font/*.svg')
-      .pipe(iconfont({
-        fontName: 'nexudus-icons-font', // required
-        fontHeight: 1000,
-        normalize: true, // icons to have the same height
-        prependUnicode: false, // true recommended option
-        formats: ['woff2'], // default, 'woff2' and 'svg' are available
-        timestamp: runTimestamp
-      }));
+// gulp.task('iconfont', function(done){
+//   const iconStream =
+//     gulp
+//       .src(imagesFolder + '/icons-font/*.svg')
+//       .pipe(iconfont({
+//         fontName: 'nexudus-icons-font', // required
+//         fontHeight: 1000,
+//         normalize: true, // icons to have the same height
+//         prependUnicode: false, // true recommended option
+//         formats: ['woff2'], // default, 'woff2' and 'svg' are available
+//         timestamp: runTimestamp
+//       }));
 
-  async.parallel([
-    function handleGlyphs(cb) {
-      iconStream.on('glyphs', function(glyphs, options) {
-        gulp
-          .src(stylesFolder + '/templates/_icons-font.scss')
-          .pipe(consolidate('lodash', {
-            glyphs: glyphs,
-            fontName: 'nexudus-icons-font',
-            fontPath: 'files/',
-            className: 'i-nexudus'
-          }))
-          .pipe(gulp.dest(stylesFolder + '/components'))
-          .on('finish', cb);
-      });
-    },
-    function handleFonts(cb) {
-      iconStream
-        .pipe(gulp.dest('files'))
-        .on('finish', cb);
-    }
-  ], done);
-});
+//   async.parallel([
+//     function handleGlyphs(cb) {
+//       iconStream.on('glyphs', function(glyphs, options) {
+//         gulp
+//           .src(stylesFolder + '/templates/_icons-font.scss')
+//           .pipe(consolidate('lodash', {
+//             glyphs: glyphs,
+//             fontName: 'nexudus-icons-font',
+//             fontPath: 'files/',
+//             className: 'i-nexudus'
+//           }))
+//           .pipe(gulp.dest(stylesFolder + '/components'))
+//           .on('finish', cb);
+//       });
+//     },
+//     function handleFonts(cb) {
+//       iconStream
+//         .pipe(gulp.dest('files'))
+//         .on('finish', cb);
+//     }
+//   ], done);
+// });
 
 // Sass
 gulp.task('sass', function () {
@@ -84,30 +87,30 @@ gulp.task('sass', function () {
     .pipe(gulp.dest('./'));
 });
 
-// Create production CSS file
-gulp.task('production-css', function() {
-  return gulp.src('styles.css')
-    .pipe(rename('css.css'))
-    .pipe(replace('#F2534A', '#primarycolor'))
-    .pipe(replace('../img/', '/content/themes/public/dos/img/'))
-    .pipe(replace('files/', '/content/themes/public/dos/fonts/'))
-    .pipe(replace('/*# sourceMappingURL=styles.css.map */', ''))
-    .pipe(gulp.dest('./'));
+// Create Views
+gulp.task('views', function buildHTML() {
+  return gulp.src(devFolder + '/**/*.pug')
+  .pipe(pug())
+  .pipe(gulp.dest(buildFolder))
+  .pipe(livereload())
+  .on('error', error => log(error))
+  .on('end', () => log('Great pug!'))
 });
 
 // Watch
 gulp.task('watch', function() {
-  gulp.watch(stylesFolder + '/**/*.scss', gulp.series('sass'));
+  gulp.watch(devFolder + '/**/*.pug', gulp.series('views'));
+  // gulp.watch(stylesFolder + '/**/*.scss', gulp.series('sass'));
   // gulp.watch(imagesFolder + '/icons-sprite/*.png', gulp.series('sprite'));
-  gulp.watch(imagesFolder + '/icons-font/*.svg', gulp.series('iconfont'));
+  // gulp.watch(imagesFolder + '/icons-font/*.svg', gulp.series('iconfont'));
 });
 
 // Build Task
 gulp.task('build',gulp.series(
                               // 'sprite',
-                              'iconfont',
+                              // 'iconfont',
                               'sass',
-                              'production-css'));
+                              'views'));
 
 // Default Task
 gulp.task('default', gulp.series('build'));
