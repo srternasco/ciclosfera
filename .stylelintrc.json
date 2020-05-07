@@ -1,0 +1,82 @@
+{
+  "extends": "stylelint-config-standard",
+	"plugins": [
+    "stylelint-order",
+    "stylelint-selector-bem-pattern"
+	],
+  "rules": {
+    "at-rule-no-unknown": [ true, {
+      "ignoreAtRules": [
+        "extend",
+        "include",
+        "mixin",
+        "each",
+        "if",
+        "function",
+        "return",
+        "for",
+        "content"
+      ]
+    }],
+    "declaration-empty-line-before": "never",
+    "number-leading-zero": null,
+    "selector-max-id": [
+      0,
+      { "severity": "warning" }
+    ],
+    "unit-whitelist": [
+      ["em", "rem", "s", "px", "%", "vh", "dpi", "deg"],
+      { "severity": "warning" }
+    ],
+    "color-hex-length": "long",
+    "order/properties-order": [
+      "display",
+      "flex",
+      "box-sizing",
+
+      "position",
+      "top",
+      "right",
+      "bottom",
+      "left",
+
+      "z-index",
+      "opacity",
+      "visibility",
+      "overflow",
+
+      "width",
+      "max-width",
+      "min-width",
+
+      "height",
+      "max-height",
+      "min-height",
+
+      "margin",
+      "padding",
+
+      "font",
+      "font-family",
+      "font-size",
+      "font-weight",
+      "letter-spacing",
+      "line-height",
+      "text-align",
+      "vertical-align",
+      "text-shadow",
+
+      "color",
+
+      "background",
+      "border",
+      "box-shadow",
+
+      "transform",
+      "transition",
+      "animation",
+
+      "content"
+		]
+  }
+}
