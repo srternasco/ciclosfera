@@ -18,8 +18,8 @@ const log = require('fancy-log');
 // Define base folders
 const devFolder = './dev';
 const buildFolder = './build';
-const imagesFolder = 'img';
-const stylesFolder = buildFolder + 'scss';
+const imagesFolder = devFolder + 'images';
+const stylesFolder = devFolder + 'scss';
 const runTimestamp = Math.round(Date.now()/1000);
 
 // Sprite
@@ -88,7 +88,7 @@ gulp.task('sass', function () {
 });
 
 // Create Views
-gulp.task('views', function buildHTML() {
+gulp.task('views', function() {
   return gulp.src(devFolder + '/**/*.pug')
   .pipe(pug())
   .pipe(gulp.dest(buildFolder))
@@ -97,16 +97,23 @@ gulp.task('views', function buildHTML() {
   .on('end', () => log('Great pug!'))
 });
 
+gulp.task('images', function() {
+  return gulp.src(devFolder + '/images/**/*')
+  .pipe(gulp.dest(buildFolder + '/images'));
+});
+
 // Watch
-gulp.task('watch', function() {
-  gulp.watch(devFolder + '/**/*.pug', gulp.series('views'));
+gulp.task('watch', async () => {
+  livereload.listen();
+  await gulp.watch(devFolder + '/**/*.pug', gulp.series('views'));
+  await gulp.watch(devFolder + '/images/**/*', gulp.series('images'));
   // gulp.watch(stylesFolder + '/**/*.scss', gulp.series('sass'));
   // gulp.watch(imagesFolder + '/icons-sprite/*.png', gulp.series('sprite'));
   // gulp.watch(imagesFolder + '/icons-font/*.svg', gulp.series('iconfont'));
 });
 
 // Build Task
-gulp.task('build',gulp.series(
+gulp.task('build', gulp.series(
                               // 'sprite',
                               // 'iconfont',
                               'sass',
